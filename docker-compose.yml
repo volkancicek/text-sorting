@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      args:
+        - FLASK_ENV=${FLASK_ENV:-production}
+    environment:
+      - FLASK_ENV=${FLASK_ENV:-production}
+    volumes:
+      - ./backend:/app
+    ports:
+      - "5000:5000"
+    profiles:
+      - dev
+      - prod
+
+  frontend:
+    build:
+      context: ./ai-agent-ui
+      args:
+        - REACT_APP_ENV=${REACT_APP_ENV:-production}
+    environment:
+      - REACT_APP_ENV=${REACT_APP_ENV:-production}
+    volumes:
+      - ./ai-agent-ui:/app
+    ports:
+      - "3000:3000" # dev
+      - "80:80"     # prod
+    depends_on:
+      - backend
+    profiles:
+      - dev
+      - prod
+
+# Usage:
+# For development: COMPOSE_PROFILES=dev docker-compose up --build
+# For production:  COMPOSE_PROFILES=prod FLASK_ENV=production REACT_APP_ENV=production docker-compose up --build 
