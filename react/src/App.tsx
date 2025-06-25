@@ -14,6 +14,7 @@ function App() {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [model, setModel] = useState<'gemini' | 'openai'>('gemini');
 
   const getCurrentTime = () => {
     return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -39,7 +40,7 @@ function App() {
     setIsLoading(true);
 
     try {
-      const response = await ApiService.classifyText(trimmedInput);
+      const response = await ApiService.classifyText(trimmedInput, model);
       if (response.result) {
         addMessage(response.result, 'agent');
       } else {
@@ -65,7 +66,22 @@ function App() {
       </aside>
       <main className="main-chat-area">
         <header className="app-header">
-          <h2>Chat with Sortz</h2>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24 }}>
+            <h2 style={{ margin: 0 }}>Chat with Sortz</h2>
+            <div className="model-select-wrapper">
+              <label htmlFor="model-select" className="model-select-label">Model:</label>
+              <select
+                id="model-select"
+                value={model}
+                onChange={e => setModel(e.target.value as 'gemini' | 'openai')}
+                className="model-select"
+                aria-label="Select AI model"
+              >
+                <option value="gemini">Gemini</option>
+                <option value="openai">OpenAI</option>
+              </select>
+            </div>
+          </div>
         </header>
         <section className="chat-area" aria-live="polite">
           {messages.length === 0 && (
