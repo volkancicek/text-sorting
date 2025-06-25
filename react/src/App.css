@@ -122,6 +122,35 @@ body, html {
   color: #3a8fff;
 }
 
+.app-header .model-select-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.model-select-label {
+  color: #3a8fff;
+  font-weight: 600;
+  font-size: 1.08rem;
+}
+
+.model-select {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  font-size: 1.08rem;
+  background: #222;
+  color: #fff;
+  box-shadow: 0 1px 4px #0002;
+  outline: none;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+.model-select:focus {
+  border: 2px solid #3a8fff;
+  box-shadow: 0 0 0 2px #3a8fff33;
+}
+
 .chat-area {
   flex: 1;
   min-height: 320px;
