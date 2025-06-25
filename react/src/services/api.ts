@@ -3,14 +3,14 @@ import { ApiResponse, ApiError } from '../types';
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 export class ApiService {
-  static async classifyText(text: string): Promise<ApiResponse> {
+  static async classifyText(text: string, model: 'gemini' | 'openai'): Promise<ApiResponse> {
     try {
       const response = await fetch(`${API_URL}/classify`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ text, model }),
       });
 
       const data = await response.json();
