@@ -3,6 +3,8 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import google.generativeai as genai
 from config.config import Config
+from services.gemini import classify_text as gemini_classify_text
+from services.openai import classify_text as openai_classify_text
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -12,39 +14,11 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 CORS(app)
 
-# Validate and load configuration
-Config.validate()
-
-# Configure Gemini
-genai.configure(api_key=Config.GEMINI_API_KEY)
-model = genai.GenerativeModel('gemini-2.5-flash')
-
-def classify_text(text: str) -> str:
-    """
-    Classify text using Gemini AI model.
-    
-    Args:
-        text (str): Input text to classify
-        
-    Returns:
-        str: Classification result
-        
-    Raises:
-        Exception: If there's an error in text classification
-    """
-    try:
-        prompt = (
-            "You are an issue classification expert. "
-            "Give a category for each comment with an adjective. "
-            "Try to create groups for the categories you created. "
-            "In the output, first write your groups and the number of the comments in each group. "
-            f"Then, write each comment with the category and group you assign in this format user_name-comment-category-group: {text}"
-        )
-        response = model.generate_content(prompt)
-        return response.text
-    except Exception as e:
-        logger.error(f"Error classifying text: {str(e)}")
-        raise
+# Model handler registry for extensibility
+MODEL_HANDLERS = {
+    'gemini': gemini_classify_text,
+    'openai': openai_classify_text,
+}
 
 @app.route('/api/classify', methods=['POST'])
 def classify_text_api():
@@ -57,12 +31,15 @@ def classify_text_api():
             }), 400
             
         text = data['text']
+        model = data.get('model', 'gemini')
         if not isinstance(text, str) or not text.strip():
             return jsonify({
                 'error': 'Invalid text: must be a non-empty string'
             }), 400
-            
-        result = classify_text(text)
+        
+        logger.info(f"/api/classify called | model: {model} | text preview: {text[:100]}")
+        handler = MODEL_HANDLERS.get(model, MODEL_HANDLERS['gemini'])
+        result = handler(text)
         return jsonify({'result': result})
         
     except Exception as e:
