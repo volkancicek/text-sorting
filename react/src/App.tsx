@@ -47,10 +47,19 @@ function App() {
         throw new Error('Invalid response from server');
       }
     } catch (error) {
-      const errorMessage = error instanceof Error 
-        ? `Error: ${error.message}`
-        : 'An unexpected error occurred';
-      addMessage(errorMessage, 'agent');
+      // Enhanced error handling for http.cat images
+      if (typeof error === 'object' && error !== null && 'status' in error && typeof (error as any).status === 'number') {
+        const status = (error as any).status;
+        addMessage(
+          `<img src="https://http.cat/${status}.jpg" alt="HTTP ${status} error cat" style="max-width: 300px; border-radius: 8px;" />`,
+          'agent'
+        );
+      } else {
+        const errorMessage = error instanceof Error 
+          ? `Error: ${error.message}`
+          : 'An unexpected error occurred';
+        addMessage(errorMessage, 'agent');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -99,7 +108,11 @@ function App() {
                 <span className="timestamp">{msg.timestamp}</span>
               </div>
               <div className="msg-text-wrapper" style={{ position: 'relative' }}>
-                <div className="msg-text">{msg.text}</div>
+                {msg.text.startsWith('<img src=') ? (
+                  <div className="msg-text" dangerouslySetInnerHTML={{ __html: msg.text }} />
+                ) : (
+                  <div className="msg-text">{msg.text}</div>
+                )}
                 {msg.sender === 'agent' && (
                   <button
                     className="copy-btn"
