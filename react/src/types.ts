@@ -13,4 +13,5 @@ export interface ApiResponse {
 export interface ApiError {
   error: string;
   message?: string;
+  status?: number;
 } 
