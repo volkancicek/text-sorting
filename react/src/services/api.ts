@@ -16,7 +16,12 @@ export class ApiService {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to classify text');
+        const apiError: ApiError = {
+          error: 'API Error',
+          message: data.message || 'Failed to classify text',
+          status: response.status,
+        };
+        throw apiError;
       }
 
       return data;
@@ -24,6 +29,7 @@ export class ApiService {
       const apiError: ApiError = {
         error: 'API Error',
         message: error instanceof Error ? error.message : 'Unknown error occurred',
+        status: (error as any)?.status,
       };
       throw apiError;
     }
